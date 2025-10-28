@@ -1,184 +1,179 @@
-# X420Mint 项目分析报告
+# mint-402
 
-## 项目概述
+这是一个包含多个区块链和Web3项目的综合仓库，主要专注于B402支付系统和相关技术演示。
 
-这是一个用于在 Base 网络上铸造 X420 代币的 Python 脚本。该项目使用 EIP-712 签名标准来创建 USDC 转账授权，并通过 HTTP 请求发送到 pong.wtf 平台进行代币铸造。
+## 📁 项目结构
 
-## ⚠️ 重要警告
-
-**请停止运行，项目已经超额，而且项目方一直不发币！**
-
-本项目仅供学习和研究目的，使用前请充分了解相关风险。
-
-## 功能特性
-
-- 🔐 使用 EIP-712 标准签名确保安全性
-- 🌐 支持 Base 网络（链ID: 8453）
-- 💰 使用 USDC 进行代币铸造
-- 🔄 支持多线程并发处理
-- 🛡️ 内置重试机制和错误处理
-
-## 技术架构
-
-### 核心依赖
-- **web3**: 用于与以太坊网络交互
-- **eth-account**: 用于账户管理和签名
-- **curl-cffi**: 用于发送 HTTP 请求
-- **loguru**: 用于日志记录
-
-### 网络配置
-- **RPC URL**: `https://mainnet.base.org` (Base 主网)
-- **链 ID**: 8453 (Base 链)
-- **USDC 合约地址**: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
-- **X420 代币地址**: `0x9b4dc4f56ec94e629252db7990f885a414a26083`
-
-## 代码结构分析
-
-### 1. 配置管理
-```python
-CONFIG = {
-    "rpcUrl": "https://mainnet.base.org",
-    "privateKey": "你的私钥 0x 开头",
-    "x420TokenAddress": "0x9b4dc4f56ec94e629252db7990f885a414a26083",
-    "UsdcAmount": "10",
-    "threadCount": 30,
-    "totalMintCount": 100000,
-    "proxy": None
-}
+```
+mint-402/
+├── b402-payment-demo/          # B402支付系统演示
+│   ├── seller-backend/         # 卖家后端服务
+│   ├── buyer-frontend/        # 买家前端界面
+│   ├── config/                # 配置文件
+│   ├── package.json           # Node.js依赖管理
+│   ├── README.md              # B402项目详细说明
+│   ├── start.sh               # 启动脚本
+│   └── test.sh                # 测试脚本
+├── pong/                      # Pong游戏项目
+│   ├── pong.py                # 游戏主文件
+│   ├── pyproject.toml         # Python项目配置
+│   ├── README.md              # Pong项目说明
+│   ├── uv.lock                # 依赖锁定文件
+│   └── 使用说明.md            # 中文使用说明
+├── venv/                      # Python虚拟环境
+└── README.md                  # 本文件
 ```
 
-### 2. EIP-712 签名结构
-项目使用 EIP-712 标准来创建类型化数据签名，包含以下结构：
-- **EIP712Domain**: 域名、版本、链ID、验证合约
-- **TransferWithAuthorization**: 转账授权信息（发送方、接收方、金额、时间窗口、随机数）
+## 🚀 项目概览
 
-### 3. 核心功能模块
+### 1. B402支付系统演示 (`b402-payment-demo/`)
 
-#### 随机数生成
-```python
-def random_bytes32_hex() -> str:
-    """生成 32 字节的 0x 前缀 hex 字符串"""
-    return "0x" + os.urandom(32).hex()
-```
+一个完整的B402协议支付系统演示，支持BSC主网上的USDT、USD1、USDC代币支付。
 
-#### 铸造函数 (`mint`)
-主要流程：
-1. 初始化账户和私钥
-2. 计算 USDC 金额（6位小数精度）
-3. 设置时间窗口（有效期）
-4. 生成随机 nonce
-5. 创建 EIP-712 消息
-6. 签名消息
-7. 组装支付数据并 Base64 编码
-8. 发送到 pong.wtf 平台
+**主要特性：**
+- ✅ BSC主网支持
+- ✅ MetaMask钱包集成
+- ✅ EIP-712签名验证
+- ✅ 多代币支持 (USDT/USD1/USDC)
+- ✅ 实时支付处理
+- ✅ 余额查询功能
 
-#### 网络请求函数 (`send`)
-- 目标 URL: `https://pong.wtf/pong10`
-- 使用 Chrome 浏览器模拟
-- 支持代理配置
-- 包含重试机制（最多3次）
-- 超时时间：360秒
+**技术栈：**
+- 后端：Node.js + Express
+- 前端：HTML + JavaScript + ethers.js
+- 区块链：BSC主网
+- 钱包：MetaMask
 
-## 安全特性
-
-### 1. EIP-712 签名
-- 使用标准化的类型化数据签名
-- 防止重放攻击（通过 nonce 和时间窗口）
-- 确保消息完整性和身份验证
-
-### 2. 时间窗口控制
-- `valid_after`: 当前时间 - 600秒（10分钟前）
-- `valid_before`: 当前时间 + 3000秒（50分钟后）
-- 防止过期签名被使用
-
-### 3. 随机数机制
-- 每次交易使用唯一的 32 字节随机数
-- 防止重放攻击
-
-## 安装和使用
-
-### 安装依赖
+**快速开始：**
 ```bash
-# 使用 uv 安装依赖
+cd b402-payment-demo
+./start.sh
+```
+
+### 2. Pong游戏项目 (`pong/`)
+
+一个基于Python的经典Pong游戏实现。
+
+**主要特性：**
+- 🎮 经典Pong游戏玩法
+- 🐍 Python实现
+- 📦 使用uv进行依赖管理
+- 📖 完整的中文说明文档
+
+**技术栈：**
+- 语言：Python
+- 依赖管理：uv
+- 游戏引擎：自定义实现
+
+**快速开始：**
+```bash
+cd pong
+uv run pong.py
+```
+
+## 🛠️ 环境要求
+
+### B402支付系统
+- Node.js >= 16.0.0
+- npm 或 yarn
+- MetaMask钱包
+- BSC主网访问
+
+### Pong游戏
+- Python >= 3.8
+- uv (Python包管理器)
+
+## 📋 安装说明
+
+### 1. 克隆仓库
+```bash
+git clone git@github.com:CryptoAscetic/mint-402.git
+cd mint-402
+```
+
+### 2. 安装B402支付系统依赖
+```bash
+cd b402-payment-demo
+npm install
+```
+
+### 3. 安装Pong游戏依赖
+```bash
+cd pong
 uv sync
-
-# 或使用 pip
-pip install -r requirements.txt
 ```
 
-### 配置要求
-1. 在 `CONFIG["privateKey"]` 中填入你的私钥（0x 开头）
-2. 确保账户有足够的 USDC 余额
-3. 根据需要调整 `UsdcAmount`（默认10 USDC）
+## 🎯 使用指南
 
-### 运行方式
-```bash
-# 运行脚本
-python pong.py
-```
+### B402支付系统演示
 
-### 多线程支持
-- 默认线程数：30
-- 总铸造次数：100,000
-- 使用 `multiprocessing.dummy.Pool` 进行并发处理
+1. **启动卖家服务器**
+   ```bash
+   cd b402-payment-demo
+   ./start.sh
+   ```
 
-## 技术细节
+2. **打开买家前端**
+   - 在浏览器中打开 `buyer-frontend/index.html`
+   - 连接MetaMask钱包
+   - 切换到BSC主网
+   - 执行支付测试
 
-### USDC 精度处理
-```python
-usdc_amount_raw = Web3.to_wei(Decimal(CONFIG["UsdcAmount"]), "mwei")
-```
-使用 `mwei` 单位处理 USDC 的 6 位小数精度。
+3. **运行测试**
+   ```bash
+   ./test.sh
+   ```
 
-### 签名过程
-1. 使用 `encode_typed_data` 编码类型化数据
-2. 使用 `account.sign_message` 进行签名
-3. 将签名转换为十六进制字符串
+### Pong游戏
 
-### 支付数据格式
-```json
-{
-    "x402Version": 1,
-    "scheme": "exact",
-    "network": "base",
-    "payload": {
-        "signature": "0x...",
-        "authorization": {
-            "from": "0x...",
-            "to": "0x...",
-            "value": "...",
-            "validAfter": "...",
-            "validBefore": "...",
-            "nonce": "0x..."
-        }
-    }
-}
-```
+1. **运行游戏**
+   ```bash
+   cd pong
+   uv run pong.py
+   ```
 
-## 风险提示
+2. **查看详细说明**
+   ```bash
+   cat 使用说明.md
+   ```
 
-- ⚠️ **资金风险**：需要真实 USDC 进行铸造
-- ⚠️ **项目风险**：项目方可能不兑现承诺
-- ⚠️ **技术风险**：私钥安全、网络连接等
-- ⚠️ **法律风险**：请遵守当地法律法规
+## 🔧 配置说明
 
-## 项目状态
+### BSC主网配置
+- **网络名称**: BNB Smart Chain
+- **Chain ID**: 56
+- **RPC URL**: https://bsc-dataseed.binance.org
+- **Relayer**: 0xE1C2830d5DDd6B49E9c46EbE03a98Cb44CD8eA5a
+- **Facilitator**: https://facilitator.b402.ai
 
-根据代码中的警告信息，该项目目前存在以下问题：
-- 项目已经超额
-- 项目方一直不发币
-- 建议停止使用
+### 支持的代币
+| 代币 | 合约地址 | 精度 |
+|------|----------|------|
+| USDT | 0x55d398326f99059fF775485246999027B3197955 | 18 |
+| USD1 | 0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d | 18 |
+| USDC | 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d | 18 |
 
+## 📚 文档
 
-## 免责声明
+- [B402支付系统详细说明](b402-payment-demo/README.md)
+- [Pong游戏说明](pong/README.md)
+- [Pong游戏中文使用说明](pong/使用说明.md)
 
-本项目仅供学习和研究目的。使用者需要自行承担所有风险，包括但不限于资金损失、技术风险和法律风险。作者不对使用本项目造成的任何损失负责。
+## 🤝 贡献
 
-## 许可证
+欢迎提交Issue和Pull Request来改进这些项目！
 
-本项目仅供学习和研究使用，请勿用于商业用途。
+## 📄 许可证
+
+MIT License
+
+## 🔗 相关链接
+
+- [B402协议文档](https://facilitator.b402.ai)
+- [BSC主网](https://bscscan.com)
+- [MetaMask钱包](https://metamask.io)
+- [uv包管理器](https://github.com/astral-sh/uv)
 
 ---
 
-**再次提醒：请停止运行，项目已经超额，而且项目方一直不发币！**
-# mint-402
+**注意**: 请确保在测试环境中使用这些项目，生产环境请谨慎操作。
