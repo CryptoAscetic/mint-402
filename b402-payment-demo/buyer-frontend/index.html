@@ -3,172 +3,486 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C神-B402支付系统演示</title>
+    <title>B402支付系统 - 小白友好版</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
+        
+        .header {
             text-align: center;
+            color: white;
             margin-bottom: 30px;
         }
-        .section {
-            margin-bottom: 30px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        .section h2 {
-            color: #555;
+        
+        .header p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .card h2 {
+            color: #333;
             margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        button {
-            background-color: #007bff;
+        
+        .step-number {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 5px;
+            padding: 15px 30px;
+            border-radius: 25px;
             cursor: pointer;
             font-size: 16px;
-            margin: 5px;
+            font-weight: 600;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
-        button:hover {
-            background-color: #0056b3;
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
-        button:disabled {
-            background-color: #ccc;
+        
+        .button:disabled {
+            background: #ccc;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
+        
+        .button.secondary {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+        }
+        
+        .button.danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+        
         .status {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+        
         .success {
-            background-color: #d4edda;
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border-left: 4px solid #28a745;
         }
+        
         .error {
-            background-color: #f8d7da;
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
             color: #721c24;
-            border: 1px solid #f5c6cb;
+            border-left: 4px solid #dc3545;
         }
+        
         .info {
-            background-color: #d1ecf1;
+            background: linear-gradient(45deg, #d1ecf1, #bee5eb);
             color: #0c5460;
-            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
         }
+        
+        .warning {
+            background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
         .wallet-info {
-            background-color: #e2e3e5;
+            background: linear-gradient(45deg, #e3f2fd, #bbdefb);
+            border: 1px solid #2196f3;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .balance-card {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
             padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
+            text-align: center;
         }
-        .token-balance {
-            display: inline-block;
-            margin: 5px 10px;
-            padding: 5px 10px;
-            background-color: #f8f9fa;
-            border-radius: 3px;
+        
+        .balance-card h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
         }
+        
+        .balance-card .amount {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
         .payment-details {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
+            background: linear-gradient(45deg, #fff3e0, #ffe0b2);
+            border: 1px solid #ff9800;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
         }
-        .code-block {
-            background-color: #f8f9fa;
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .help-text {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
             padding: 15px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .help-text h4 {
+            margin: 0 0 10px 0;
+            color: #0056b3;
+        }
+        
+        .help-text ul {
             margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .help-text li {
+            margin: 5px 0;
+            color: #495057;
+        }
+        
+        .network-info {
+            background: linear-gradient(45deg, #e8f5e8, #c8e6c9);
+            border: 1px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .balance-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 B402支付系统演示</h1>
-        
-        <div class="section">
-            <h2>📱 钱包连接</h2>
-            <button onclick="connectWallet()">连接MetaMask钱包</button>
-            <div id="walletStatus" class="wallet-info" style="display: none;">
-                <strong>钱包地址:</strong> <span id="walletAddress"></span><br>
-                <strong>网络:</strong> <span id="networkInfo"></span>
-            </div>
+        <div class="header">
+            <h1>🚀 B402支付系统演示</h1>
+            <p>简单易用的区块链支付体验</p>
         </div>
 
-        <div class="section">
-            <h2>💰 代币余额</h2>
-            <button onclick="checkBalances()">检查余额</button>
-            <div id="balanceInfo" style="display: none;">
-                <div class="token-balance">
-                    <strong>USDT:</strong> <span id="usdtBalance">-</span>
-                </div>
-                <div class="token-balance">
-                    <strong>USD1:</strong> <span id="usd1Balance">-</span>
-                </div>
-                <div class="token-balance">
-                    <strong>USDC:</strong> <span id="usdcBalance">-</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>💳 支付操作</h2>
-            <button onclick="getPaymentRequirements()">获取支付要求</button>
-            <button onclick="makePayment()" id="payButton" disabled>执行支付</button>
+        <!-- 步骤1: 钱包连接 -->
+        <div class="card">
+            <h2>
+                <span class="step-number">1</span>
+                <span class="emoji">📱</span>
+                连接钱包
+            </h2>
             
-            <div id="paymentRequirements" class="payment-details" style="display: none;">
-                <h3>支付要求:</h3>
+            <div class="help-text">
+                <h4>💡 什么是钱包？</h4>
+                <p>钱包就像您的数字银行账户，用来存储和管理您的加密货币。</p>
+                <ul>
+                    <li>MetaMask是最常用的钱包之一</li>
+                    <li>如果您没有安装，请先安装MetaMask浏览器插件</li>
+                    <li>连接后会自动切换到BSC网络</li>
+                </ul>
+            </div>
+            
+            <button class="button" onclick="connectWallet()" id="connectBtn">
+                <span class="emoji">🔗</span> 连接MetaMask钱包
+            </button>
+            
+            <div id="walletStatus" class="wallet-info hidden">
+                <h4><span class="emoji">✅</span> 钱包已连接</h4>
+                <p><strong>钱包地址:</strong> <span id="walletAddress"></span></p>
+                <p><strong>网络:</strong> <span id="networkInfo"></span></p>
+            </div>
+        </div>
+
+        <!-- 步骤2: 检查余额 -->
+        <div class="card">
+            <h2>
+                <span class="step-number">2</span>
+                <span class="emoji">💰</span>
+                检查代币余额
+            </h2>
+            
+            <div class="help-text">
+                <h4>💡 什么是代币余额？</h4>
+                <p>代币余额显示您钱包中各种加密货币的数量。我们需要检查您是否有足够的代币进行支付。</p>
+            </div>
+            
+            <button class="button secondary" onclick="checkBalances()" id="balanceBtn">
+                <span class="emoji">🔍</span> 检查余额
+            </button>
+            
+            <div id="balanceInfo" class="balance-grid hidden">
+                <div class="balance-card">
+                    <h4><span class="emoji">💵</span> USDT</h4>
+                    <div class="amount" id="usdtBalance">-</div>
+                </div>
+                <div class="balance-card">
+                    <h4><span class="emoji">💵</span> USD1</h4>
+                    <div class="amount" id="usd1Balance">-</div>
+                </div>
+                <div class="balance-card">
+                    <h4><span class="emoji">💵</span> USDC</h4>
+                    <div class="amount" id="usdcBalance">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤3: 支付操作 -->
+        <div class="card">
+            <h2>
+                <span class="step-number">3</span>
+                <span class="emoji">💳</span>
+                执行支付
+            </h2>
+            
+            <div class="help-text">
+                <h4>💡 支付流程说明</h4>
+                <ol>
+                    <li>首先获取支付要求（了解需要支付多少）</li>
+                    <li>然后执行支付（确认交易）</li>
+                    <li>等待区块链确认</li>
+                </ol>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <button class="button secondary" onclick="getPaymentRequirements()" id="requirementsBtn">
+                <span class="emoji">📋</span> 获取支付要求
+            </button>
+            
+            <button class="button" onclick="makePayment()" id="payButton" disabled>
+                <span class="emoji">💸</span> 执行支付
+            </button>
+            
+            <div id="paymentRequirements" class="payment-details hidden">
+                <h4><span class="emoji">📄</span> 支付详情</h4>
                 <div id="requirementsContent"></div>
             </div>
             
             <div id="paymentStatus"></div>
         </div>
 
-        <div class="section">
-            <h2>📋 系统信息</h2>
-            <div class="code-block">
-                <strong>BSC主网配置:</strong><br>
-                网络: BSC (Binance Smart Chain)<br>
-                Chain ID: 56<br>
-                RPC: https://bsc-dataseed.binance.org<br>
-                Relayer: 0xE1C2830d5DDd6B49E9c46EbE03a98Cb44CD8eA5a<br>
-                Facilitator: https://facilitator.b402.ai<br><br>
-                <strong>支持的代币:</strong><br>
-                USDT: 0x55d398326f99059fF775485246999027B3197955<br>
-                USD1: 0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d<br>
-                USDC: 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d
+        <!-- 系统信息 -->
+        <div class="card">
+            <h2>
+                <span class="emoji">📋</span>
+                系统信息
+            </h2>
+            
+            <div class="network-info">
+                <h4><span class="emoji">🌐</span> BSC主网配置</h4>
+                <p><strong>网络名称:</strong> BSC (Binance Smart Chain)</p>
+                <p><strong>链ID:</strong> 56</p>
+                <p><strong>RPC地址:</strong> https://bsc-dataseed.binance.org</p>
+                <p><strong>中继器:</strong> 0xE1C2830d5DDd6B49E9c46EbE03a98Cb44CD8eA5a</p>
+                <p><strong>协调器:</strong> https://facilitator.b402.ai</p>
+            </div>
+            
+            <div class="network-info">
+                <h4><span class="emoji">🪙</span> 支持的代币</h4>
+                <p><strong>USDT:</strong> 0x55d398326f99059fF775485246999027B3197955</p>
+                <p><strong>USD1:</strong> 0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d</p>
+                <p><strong>USDC:</strong> 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d</p>
             </div>
         </div>
+
+        <!-- 帮助信息 -->
+        <div class="card">
+            <h2>
+                <span class="emoji">❓</span>
+                常见问题
+            </h2>
+            
+            <div class="help-text">
+                <h4>🔧 如果遇到问题怎么办？</h4>
+                <ul>
+                    <li><strong>钱包连接失败:</strong> 确保已安装MetaMask并解锁钱包</li>
+                    <li><strong>网络错误:</strong> 检查网络连接，确保钱包连接到BSC主网</li>
+                    <li><strong>余额不足:</strong> 确保钱包中有足够的代币余额</li>
+                    <li><strong>交易失败:</strong> 检查Gas费用设置，确保有足够的BNB支付手续费</li>
+                </ul>
+            </div>
+            
+            <div class="help-text">
+                <h4>⚠️ 安全提醒</h4>
+                <ul>
+                    <li>这是演示系统，请勿使用真实资金进行测试</li>
+                    <li>永远不要分享您的私钥或助记词</li>
+                    <li>确认交易前请仔细检查收款地址</li>
+                    <li>建议在测试网络上先熟悉操作流程</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>B402支付系统演示 - 让区块链支付变得简单</p>
     </div>
 
     <script src="payment-client.js"></script>
     <script>
         let paymentClient = null;
         let walletConnected = false;
+        let currentStep = 0;
 
+        // 更新进度条
+        function updateProgress(step) {
+            const progressFill = document.getElementById('progressFill');
+            const percentage = (step / 3) * 100;
+            progressFill.style.width = percentage + '%';
+        }
+
+        // 显示状态信息
+        function showStatus(message, type, showLoading = false) {
+            const statusDiv = document.getElementById('paymentStatus');
+            const loadingHtml = showLoading ? '<span class="loading"></span>' : '';
+            statusDiv.innerHTML = `<div class="status ${type}">${loadingHtml} ${message}</div>`;
+        }
+
+        // 连接钱包
         async function connectWallet() {
+            const connectBtn = document.getElementById('connectBtn');
+            connectBtn.innerHTML = '<span class="loading"></span> 正在连接...';
+            connectBtn.disabled = true;
+            
             try {
                 if (!window.ethereum) {
-                    showStatus('请安装MetaMask钱包', 'error');
+                    showStatus('请先安装MetaMask钱包插件', 'error');
+                    connectBtn.innerHTML = '<span class="emoji">🔗</span> 连接MetaMask钱包';
+                    connectBtn.disabled = false;
                     return;
                 }
 
@@ -177,26 +491,36 @@
                 
                 document.getElementById('walletAddress').textContent = address;
                 document.getElementById('networkInfo').textContent = 'BSC主网 (Chain ID: 56)';
-                document.getElementById('walletStatus').style.display = 'block';
+                document.getElementById('walletStatus').classList.remove('hidden');
                 
                 walletConnected = true;
                 document.getElementById('payButton').disabled = false;
+                currentStep = 1;
+                updateProgress(currentStep);
                 
-                showStatus('钱包连接成功!', 'success');
+                showStatus('钱包连接成功！现在可以检查余额了', 'success');
+                connectBtn.innerHTML = '<span class="emoji">✅</span> 已连接';
                 
             } catch (error) {
                 showStatus('钱包连接失败: ' + error.message, 'error');
+                connectBtn.innerHTML = '<span class="emoji">🔗</span> 连接MetaMask钱包';
+                connectBtn.disabled = false;
             }
         }
 
+        // 检查余额
         async function checkBalances() {
             if (!walletConnected) {
                 showStatus('请先连接钱包', 'error');
                 return;
             }
 
+            const balanceBtn = document.getElementById('balanceBtn');
+            balanceBtn.innerHTML = '<span class="loading"></span> 检查中...';
+            balanceBtn.disabled = true;
+
             try {
-                showStatus('正在检查余额...', 'info');
+                showStatus('正在检查您的代币余额...', 'info', true);
                 
                 const usdtBalance = await paymentClient.checkTokenBalance('USDT');
                 const usd1Balance = await paymentClient.checkTokenBalance('USD1');
@@ -206,64 +530,84 @@
                 document.getElementById('usd1Balance').textContent = usd1Balance + ' USD1';
                 document.getElementById('usdcBalance').textContent = usdcBalance + ' USDC';
                 
-                document.getElementById('balanceInfo').style.display = 'block';
-                showStatus('余额检查完成', 'success');
+                document.getElementById('balanceInfo').classList.remove('hidden');
+                currentStep = 2;
+                updateProgress(currentStep);
+                
+                showStatus('余额检查完成！现在可以获取支付要求了', 'success');
+                balanceBtn.innerHTML = '<span class="emoji">✅</span> 已检查';
                 
             } catch (error) {
                 showStatus('余额检查失败: ' + error.message, 'error');
+                balanceBtn.innerHTML = '<span class="emoji">🔍</span> 检查余额';
+                balanceBtn.disabled = false;
             }
         }
 
+        // 获取支付要求
         async function getPaymentRequirements() {
+            const requirementsBtn = document.getElementById('requirementsBtn');
+            requirementsBtn.innerHTML = '<span class="loading"></span> 获取中...';
+            requirementsBtn.disabled = true;
+
             try {
-                showStatus('正在获取支付要求...', 'info');
+                showStatus('正在获取支付要求...', 'info', true);
                 
                 const requirements = await paymentClient.getPaymentRequirements();
                 
                 document.getElementById('requirementsContent').innerHTML = `
-                    <strong>代币:</strong> ${requirements.token}<br>
-                    <strong>金额:</strong> ${ethers.utils.formatUnits(requirements.amount, 18)} USDT<br>
-                    <strong>收款地址:</strong> ${requirements.recipient}<br>
-                    <strong>截止时间:</strong> ${new Date(requirements.deadline * 1000).toLocaleString()}
+                    <p><strong>代币类型:</strong> USDT</p>
+                    <p><strong>支付金额:</strong> ${ethers.utils.formatUnits(requirements.amount, 18)} USDT</p>
+                    <p><strong>收款地址:</strong> ${requirements.recipient}</p>
+                    <p><strong>截止时间:</strong> ${new Date(requirements.deadline * 1000).toLocaleString()}</p>
                 `;
                 
-                document.getElementById('paymentRequirements').style.display = 'block';
-                showStatus('支付要求获取成功', 'success');
+                document.getElementById('paymentRequirements').classList.remove('hidden');
+                currentStep = 3;
+                updateProgress(currentStep);
+                
+                showStatus('支付要求获取成功！现在可以执行支付了', 'success');
+                requirementsBtn.innerHTML = '<span class="emoji">✅</span> 已获取';
                 
             } catch (error) {
                 showStatus('获取支付要求失败: ' + error.message, 'error');
+                requirementsBtn.innerHTML = '<span class="emoji">📋</span> 获取支付要求';
+                requirementsBtn.disabled = false;
             }
         }
 
+        // 执行支付
         async function makePayment() {
             if (!walletConnected) {
                 showStatus('请先连接钱包', 'error');
                 return;
             }
 
+            const payButton = document.getElementById('payButton');
+            payButton.innerHTML = '<span class="loading"></span> 处理中...';
+            payButton.disabled = true;
+
             try {
-                showStatus('正在处理支付...', 'info');
+                showStatus('正在处理支付，请稍候...', 'info', true);
                 
                 const result = await paymentClient.makePayment();
                 
-                showStatus('支付成功! 交易哈希: ' + result.transaction, 'success');
+                showStatus('🎉 支付成功！交易哈希: ' + result.transaction, 'success');
+                payButton.innerHTML = '<span class="emoji">✅</span> 支付成功';
                 
             } catch (error) {
                 showStatus('支付失败: ' + error.message, 'error');
+                payButton.innerHTML = '<span class="emoji">💸</span> 执行支付';
+                payButton.disabled = false;
             }
         }
 
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('paymentStatus');
-            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-        }
-
-        // 页面加载时检查MetaMask
+        // 页面加载时的初始化
         window.addEventListener('load', function() {
             if (typeof window.ethereum !== 'undefined') {
-                showStatus('检测到MetaMask钱包，请点击连接按钮', 'info');
+                showStatus('检测到MetaMask钱包，请点击连接按钮开始', 'info');
             } else {
-                showStatus('未检测到MetaMask钱包，请先安装MetaMask', 'error');
+                showStatus('未检测到MetaMask钱包，请先安装MetaMask浏览器插件', 'warning');
             }
         });
     </script>
