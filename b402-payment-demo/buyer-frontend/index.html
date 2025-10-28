@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B402支付系统演示</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .section h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .wallet-info {
+            background-color: #e2e3e5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .token-balance {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 5px 10px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+        }
+        .payment-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 B402支付系统演示</h1>
+        
+        <div class="section">
+            <h2>📱 钱包连接</h2>
+            <button onclick="connectWallet()">连接MetaMask钱包</button>
+            <div id="walletStatus" class="wallet-info" style="display: none;">
+                <strong>钱包地址:</strong> <span id="walletAddress"></span><br>
+                <strong>网络:</strong> <span id="networkInfo"></span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💰 代币余额</h2>
+            <button onclick="checkBalances()">检查余额</button>
+            <div id="balanceInfo" style="display: none;">
+                <div class="token-balance">
+                    <strong>USDT:</strong> <span id="usdtBalance">-</span>
+                </div>
+                <div class="token-balance">
+                    <strong>USD1:</strong> <span id="usd1Balance">-</span>
+                </div>
+                <div class="token-balance">
+                    <strong>USDC:</strong> <span id="usdcBalance">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💳 支付操作</h2>
+            <button onclick="getPaymentRequirements()">获取支付要求</button>
+            <button onclick="makePayment()" id="payButton" disabled>执行支付</button>
+            
+            <div id="paymentRequirements" class="payment-details" style="display: none;">
+                <h3>支付要求:</h3>
+                <div id="requirementsContent"></div>
+            </div>
+            
+            <div id="paymentStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>📋 系统信息</h2>
+            <div class="code-block">
+                <strong>BSC主网配置:</strong><br>
+                网络: BSC (Binance Smart Chain)<br>
+                Chain ID: 56<br>
+                RPC: https://bsc-dataseed.binance.org<br>
+                Relayer: 0xE1C2830d5DDd6B49E9c46EbE03a98Cb44CD8eA5a<br>
+                Facilitator: https://facilitator.b402.ai<br><br>
+                <strong>支持的代币:</strong><br>
+                USDT: 0x55d398326f99059fF775485246999027B3197955<br>
+                USD1: 0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d<br>
+                USDC: 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d
+            </div>
+        </div>
+    </div>
+
+    <script src="payment-client.js"></script>
+    <script>
+        let paymentClient = null;
+        let walletConnected = false;
+
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    showStatus('请安装MetaMask钱包', 'error');
+                    return;
+                }
+
+                paymentClient = new B402PaymentClient();
+                const address = await paymentClient.connectWallet();
+                
+                document.getElementById('walletAddress').textContent = address;
+                document.getElementById('networkInfo').textContent = 'BSC主网 (Chain ID: 56)';
+                document.getElementById('walletStatus').style.display = 'block';
+                
+                walletConnected = true;
+                document.getElementById('payButton').disabled = false;
+                
+                showStatus('钱包连接成功!', 'success');
+                
+            } catch (error) {
+                showStatus('钱包连接失败: ' + error.message, 'error');
+            }
+        }
+
+        async function checkBalances() {
+            if (!walletConnected) {
+                showStatus('请先连接钱包', 'error');
+                return;
+            }
+
+            try {
+                showStatus('正在检查余额...', 'info');
+                
+                const usdtBalance = await paymentClient.checkTokenBalance('USDT');
+                const usd1Balance = await paymentClient.checkTokenBalance('USD1');
+                const usdcBalance = await paymentClient.checkTokenBalance('USDC');
+                
+                document.getElementById('usdtBalance').textContent = usdtBalance + ' USDT';
+                document.getElementById('usd1Balance').textContent = usd1Balance + ' USD1';
+                document.getElementById('usdcBalance').textContent = usdcBalance + ' USDC';
+                
+                document.getElementById('balanceInfo').style.display = 'block';
+                showStatus('余额检查完成', 'success');
+                
+            } catch (error) {
+                showStatus('余额检查失败: ' + error.message, 'error');
+            }
+        }
+
+        async function getPaymentRequirements() {
+            try {
+                showStatus('正在获取支付要求...', 'info');
+                
+                const requirements = await paymentClient.getPaymentRequirements();
+                
+                document.getElementById('requirementsContent').innerHTML = `
+                    <strong>代币:</strong> ${requirements.token}<br>
+                    <strong>金额:</strong> ${ethers.utils.formatUnits(requirements.amount, 18)} USDT<br>
+                    <strong>收款地址:</strong> ${requirements.recipient}<br>
+                    <strong>截止时间:</strong> ${new Date(requirements.deadline * 1000).toLocaleString()}
+                `;
+                
+                document.getElementById('paymentRequirements').style.display = 'block';
+                showStatus('支付要求获取成功', 'success');
+                
+            } catch (error) {
+                showStatus('获取支付要求失败: ' + error.message, 'error');
+            }
+        }
+
+        async function makePayment() {
+            if (!walletConnected) {
+                showStatus('请先连接钱包', 'error');
+                return;
+            }
+
+            try {
+                showStatus('正在处理支付...', 'info');
+                
+                const result = await paymentClient.makePayment();
+                
+                showStatus('支付成功! 交易哈希: ' + result.transaction, 'success');
+                
+            } catch (error) {
+                showStatus('支付失败: ' + error.message, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('paymentStatus');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // 页面加载时检查MetaMask
+        window.addEventListener('load', function() {
+            if (typeof window.ethereum !== 'undefined') {
+                showStatus('检测到MetaMask钱包，请点击连接按钮', 'info');
+            } else {
+                showStatus('未检测到MetaMask钱包，请先安装MetaMask', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
