@@ -169,11 +169,6 @@ usdc_amount_raw = Web3.to_wei(Decimal(CONFIG["UsdcAmount"]), "mwei")
 - 项目方一直不发币
 - 建议停止使用
 
-## 作者信息
-
-- **作者**: 0xNaixi
-- **Twitter**: [@0xNaiXi](https://x.com/0xNaiXi)
-- **验证码平台**: [nocaptcha.io](https://www.nocaptcha.io/register?c=hLf08E)
 
 ## 免责声明
 
